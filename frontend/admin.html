@@ -1,1 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Paneli - QR Sipariş</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
 
+    <!-- HEADER -->
+    <header class="header">
+        <h1><i class="fa-solid fa-gear text-primary float-icon"></i> Admin Paneli</h1>
+        <a href="index.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> Menüyü Gör</a>
+    </header>
+
+    <div class="admin-layout" style="display:flex; flex-direction:column;">
+        <div class="admin-tabs" style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">
+            <div class="admin-tab active wobble-hover" id="tabBtnSiparisler" onclick="switchTab('siparisler')" style="padding: 12px 24px; font-weight: 600; cursor: pointer; border-radius: var(--radius-md) var(--radius-md) 0 0;"><i class="fa-solid fa-bell-concierge"></i> Sipariş Merkezi</div>
+            <div class="admin-tab wobble-hover" id="tabBtnMenu" onclick="switchTab('menu')" style="padding: 12px 24px; font-weight: 600; cursor: pointer; border-radius: var(--radius-md) var(--radius-md) 0 0;"><i class="fa-solid fa-utensils"></i> Menü & Kategori Yönetimi</div>
+            <div class="admin-tab wobble-hover" id="tabBtnArsiv" onclick="switchTab('arsiv')" style="padding: 12px 24px; font-weight: 600; cursor: pointer; border-radius: var(--radius-md) var(--radius-md) 0 0;"><i class="fa-solid fa-box-archive"></i> Arşiv & Raporlar</div>
+        </div>
+
+        <!-- TAB 1: SİPARİŞ MERKEZİ -->
+        <div id="tab-siparisler" class="tab-pane active" style="display: block;">
+            <div class="admin-card" style="margin-bottom: 24px;">
+                <div class="admin-card-title" style="border-bottom: 2px solid var(--primary); padding-bottom: 10px;">
+                    <span><i class="fa-solid fa-bell-concierge text-primary"></i> Aktif Siparişler ve İstekler</span>
+                </div>
+                <div id="aktifSiparisler" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+                    <div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> Yükleniyor...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MENÜ YÖNETİMİ -->
+        <div id="tab-menu" class="tab-pane" style="display: none;">
+            <div class="admin-layout-grid" style="display: grid; grid-template-columns: 350px 1fr; gap: 24px;">
+                <!-- SOL PANEL: ÜRÜN VE KATEGORİ FORMLARI -->
+                <div>
+                    <!-- ÜRÜN EKLE/DÜZENLE FORMU -->
+                    <div class="admin-card">
+                        <div class="admin-card-title" id="formTitle">
+                            <span><i class="fa-solid fa-plus text-primary"></i> Yeni Ürün Ekle</span>
+                            <button class="btn btn-outline btn-sm" id="cancelEditBtn" style="display:none;" onclick="cancelEdit()">İptal</button>
+                        </div>
+                        
+                        <form id="urunForm">
+                            <input type="hidden" id="editUrunId">
+                            
+                            <div class="form-group">
+                                <label class="form-label">Ürün Adı</label>
+                                <input type="text" id="urunAdi" class="form-control" placeholder="Örn: Klasik Burger" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Fiyat (TL)</label>
+                                <input type="number" id="urunFiyati" class="form-control" placeholder="Örn: 250" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Stok Adedi (Boş bırakılırsa sınırsız)</label>
+                                <input type="number" id="urunStok" class="form-control" placeholder="Örn: 50">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Ana Kategori</label>
+                                <select id="urunAnaKategori" class="form-control" required>
+                                    <option value="">Seçiniz...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Alt Kategori</label>
+                                <select id="urunAltKategori" class="form-control" required>
+                                    <option value="">Önce Ana Kategori Seçin...</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%;" id="submitBtn">
+                                <i class="fa-solid fa-save"></i> Kaydet
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- KATEGORİ YÖNETİMİ FORMU -->
+                    <div class="admin-card" style="margin-top: 24px;">
+                        <div class="admin-card-title">
+                            <span><i class="fa-solid fa-tags text-primary"></i> Kategori Yönetimi</span>
+                        </div>
+                        
+                        <form id="anaKategoriForm">
+                            <div class="form-group">
+                                <label class="form-label">Yeni Ana Kategori Ekle / Sil</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="yeniAnaKategori" class="form-control" placeholder="Örn: Tatlılar">
+                                    <button type="submit" class="btn btn-primary" title="Ekle"><i class="fa-solid fa-plus"></i></button>
+                                    <button type="button" class="btn btn-danger" title="Ana Kategoriyi Sil" onclick="deleteAnaKategori()"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+                        <form id="altKategoriForm">
+                            <div class="form-group">
+                                <label class="form-label">Hangi Ana Kategoriye?</label>
+                                <select id="hedefAnaKategori" class="form-control" required>
+                                    <option value="">Ana Kategori Seçin...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Yeni Alt Kategori Ekle / Seçili Olanı Sil</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="yeniAltKategori" class="form-control" placeholder="Örn: Sütlü Tatlılar">
+                                    <button type="submit" class="btn btn-primary" title="Ekle"><i class="fa-solid fa-plus"></i></button>
+                                    <button type="button" class="btn btn-danger" title="Seçili Alt Kategoriyi Sil (Üstteki seçime göre)" onclick="deleteAltKategori()"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Alt Kategori Görsel URL (Opsiyonel)</label>
+                                <input type="url" id="yeniAltKategoriGorsel" class="form-control" placeholder="https://...">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- SAĞ PANEL: ÜRÜN TABLOSU -->
+                <div>
+                    <div class="admin-card">
+                        <div class="admin-card-title">
+                            <span><i class="fa-solid fa-list text-primary"></i> Ürün Listesi (Filtreli)</span>
+                        </div>
+                        
+                        <div style="display:flex; gap:12px; margin-bottom: 16px;">
+                           <select id="filterAnaKategori" class="form-control" onchange="loadFilterAltKategoriler()"><option value="">Ana Kategori Seçin</option></select>
+                           <select id="filterAltKategori" class="form-control" onchange="renderFilteredProducts()"><option value="">Önce Ana Kategori Seçin</option></select>
+                        </div>
+                        
+                        <div class="table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            <table class="admin-table" style="margin: 0; border-collapse: separate; border-spacing: 0;">
+                                <thead style="position: sticky; top: 0; z-index: 10;">
+                                    <tr>
+                                        <th>Görsel</th>
+                                        <th>Ürün Adı</th>
+                                        <th>Fiyat</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="urunListesiTbody">
+                                    <tr>
+                                        <td colspan="4" class="loader" style="text-align:center;"><i class="fa-solid fa-filter"></i> Lütfen listelemek için kategori seçin.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- /admin-layout-grid -->
+        </div>
+        
+        <!-- TAB 3: ARŞİV VE RAPORLAR -->
+        <div id="tab-arsiv" class="tab-pane" style="display: none;">
+            <div class="admin-card" style="margin-bottom: 24px; background: linear-gradient(135deg, #f8fafc, #e2e8f0); border: 1px solid #cbd5e1;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="margin:0; font-size: 20px; color: var(--text-dark);"><i class="fa-solid fa-chart-pie text-primary"></i> Gün Sonu (Z-Raporu)</h2>
+                        <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 14px;">Aktif masalar kapatıldıktan sonra gün sonu alabilirsiniz.</p>
+                    </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button class="btn btn-outline" style="border-color: #ef4444; color: #ef4444;" onclick="arsiviTemizle()">
+                        <i class="fa-solid fa-trash-can"></i> Arşivi Temizle
+                    </button>
+                    <button class="btn btn-primary" onclick="alZRaporu()" style="padding: 12px 24px; font-size: 16px; font-weight: 700; box-shadow: var(--neo-shadow); border-radius: var(--radius-full);">
+                        <i class="fa-solid fa-file-invoice"></i> Günü Kapat / Z-Raporu Al
+                    </button>
+                </div>
+                </div>
+
+                <!-- BEKLEYEN MASALAR ALANI -->
+                <div style="margin-top: 20px; border-top: 1px dashed #94a3b8; padding-top: 15px;">
+                    <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--text-dark);"><i class="fa-regular fa-clock text-primary"></i> Günü Kapatmayı Bekleyen Masalar</h3>
+                    <div id="bekleyenZRaporlari" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px;">
+                        <div style="font-size: 13px; color: var(--text-muted);">Henüz kapanmış ve Z-Raporu bekleyen masa yok.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-card">
+                <div class="admin-card-title">
+                    <span><i class="fa-solid fa-box-archive text-primary"></i> Geçmiş Gün Sonu Raporları ve Arşiv</span>
+                </div>
+                <div id="arsivListesi" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> Yükleniyor...</div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- /admin-layout -->
+    
+    <!-- ÖDEME VE ADİSYON BÖLME MODALI -->
+    <div class="modal-overlay" id="odemeOverlay">
+        <div class="waiter-modal" style="max-width: 600px;">
+            <div class="cart-header" style="justify-content: space-between; margin-bottom: 15px;">
+                <h2 style="margin:0;"><i class="fa-solid fa-credit-card text-primary"></i> Ödeme Al - <span id="odemeMasaIsmi"></span></h2>
+                <button class="cart-close" onclick="closeOdemeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Ödemesi alınacak ürünleri seçin. (Adisyon bölmek için ödenecek olan adetleri belirleyin)</div>
+            
+            <div id="odemeUrunListesi" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                <!-- items injected here -->
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                <div style="font-size: 18px; font-weight: 700;">Seçili Tutar: <span id="odemeSeciliTutar" class="text-primary">0 ₺</span></div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-outline" style="border-color: #10b981; color: #10b981;" onclick="islemYapOdeme('Nakit')"><i class="fa-solid fa-money-bill"></i> Nakit</button>
+                    <button class="btn btn-outline" style="border-color: #3b82f6; color: #3b82f6;" onclick="islemYapOdeme('Kredi Kartı')"><i class="fa-solid fa-credit-card"></i> Kredi Kartı</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- GÖRSEL EKLEME MODALI -->
+    <div class="modal-overlay" id="gorselOverlay">
+        <div class="waiter-modal" style="max-width: 400px;">
+            <div class="cart-header" style="justify-content: space-between; margin-bottom: 15px;">
+                <h2 style="margin:0;"><i class="fa-solid fa-image text-primary"></i> Görsel Yönetimi</h2>
+                <button class="cart-close" onclick="closeGorselModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <input type="hidden" id="gorselUrunId">
+            <div class="form-group">
+                <label class="form-label">Ürün Görsel URL'si</label>
+                <input type="url" id="modalUrunGorsel" class="form-control" placeholder="https://resim-linki.com/resim.jpg">
+            </div>
+            <button class="btn btn-primary" style="width:100%;" onclick="saveUrunGorsel()">Görseli Kaydet</button>
+        </div>
+    </div>
+    
+    <!-- İKRAM MODALI -->
+    <div class="modal-overlay" id="ikramOverlay">
+        <div class="waiter-modal" style="max-width: 400px;">
+            <div class="cart-header" style="justify-content: space-between; margin-bottom: 15px;">
+                <h2 style="margin:0;"><i class="fa-solid fa-gift text-primary"></i> İkram Et</h2>
+                <button class="cart-close" onclick="closeIkramModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <input type="hidden" id="ikramSiparisId">
+            <input type="hidden" id="ikramItemIndex">
+            <div style="font-size: 14px; margin-bottom: 15px;">
+                Seçili ürün: <strong id="ikramUrunIsmi"></strong><br>
+                Kalan ödenebilir/ikram edilebilir adet: <strong id="ikramKalanAdet"></strong>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kaç Adet İkram Edilecek?</label>
+                <div style="display: flex; gap: 10px; align-items: center; justify-content: center; margin-bottom: 20px;">
+                    <button class="btn btn-outline" style="border-radius: 50%; width: 40px; height: 40px; padding: 0;" onclick="changeIkramAdet(-1)"><i class="fa-solid fa-minus"></i></button>
+                    <input type="number" id="ikramAdetInput" class="form-control" style="width: 80px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 0;" value="1" min="1" readonly>
+                    <button class="btn btn-outline" style="border-radius: 50%; width: 40px; height: 40px; padding: 0;" onclick="changeIkramAdet(1)"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;" onclick="saveIkram()"><i class="fa-solid fa-check"></i> Onayla</button>
+        </div>
+    </div>
+    <!-- CUSTOM CONFIRM MODAL -->
+    <div class="confirm-overlay" id="customConfirmOverlay">
+        <div class="confirm-modal">
+            <div class="confirm-icon" id="confirmIcon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="confirm-title" id="confirmTitle">Emin misiniz?</h3>
+            <p class="confirm-message" id="confirmMessage">Bu işlemi yapmak istediğinize emin misiniz?</p>
+            <div class="confirm-buttons">
+                <button class="btn btn-outline" onclick="closeCustomConfirm()">İptal</button>
+                <button class="btn btn-danger" id="confirmActionBtn">Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.getElementById('tab-siparisler').style.display = 'none';
+            document.getElementById('tab-menu').style.display = 'none';
+            document.getElementById('tab-arsiv').style.display = 'none';
+            
+            document.getElementById('tabBtnSiparisler').classList.remove('active');
+            document.getElementById('tabBtnMenu').classList.remove('active');
+            document.getElementById('tabBtnArsiv').classList.remove('active');
+            
+            document.getElementById('tab-' + tabId).style.display = 'block';
+            if(tabId === 'siparisler') document.getElementById('tabBtnSiparisler').classList.add('active');
+            if(tabId === 'menu') document.getElementById('tabBtnMenu').classList.add('active');
+            if(tabId === 'arsiv') document.getElementById('tabBtnArsiv').classList.add('active');
+        }
+    </script>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- Kendi JS dosyamız -->
+    <script src="admin.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+[debug] [2026-05-01T17:25:48.051Z] ----------------------------------------------------------------------
+[debug] [2026-05-01T17:25:48.054Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\cakam\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2026-05-01T17:25:48.055Z] CLI Version:   15.16.0
+[debug] [2026-05-01T17:25:48.055Z] Platform:      win32
+[debug] [2026-05-01T17:25:48.055Z] Node Version:  v24.15.0
+[debug] [2026-05-01T17:25:48.055Z] Time:          Fri May 01 2026 20:25:48 GMT+0300 (Türkiye Standart Saati)
+[debug] [2026-05-01T17:25:48.055Z] ----------------------------------------------------------------------
+[debug] 
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\cakam\OneDrive\Desktop\QR-menu-siparis-sistemi\backend
+

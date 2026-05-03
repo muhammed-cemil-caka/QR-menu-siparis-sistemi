@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijital Menü</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <!-- WELCOME SCREEN -->
+    <div id="welcomeScreen">
+        <div class="welcome-logo">
+            <i class="fa-solid fa-bell-concierge"></i>
+        </div>
+        <h1 style="font-size: 32px; font-weight: 800; color: var(--text-dark); margin-bottom: 8px; text-align: center;">Menümüze</h1>
+        <h2 style="font-size: 24px; font-weight: 500; color: var(--text-muted); margin-bottom: 40px; text-align: center;">Hoş Geldiniz</h2>
+        <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px; border-radius: var(--radius-full);" onclick="closeWelcomeScreen()">
+            Menüye Git <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+        <h1><i class="fa-solid fa-utensils text-primary float-icon"></i> Restoran Menüsü</h1>
+        <div><i class="fa-solid fa-bars"></i></div>
+    </header>
+
+
+
+    <!-- CONTAINER -->
+    <div class="container" style="padding-top: 20px;">
+        <div id="accordionContainer" class="accordion-container">
+            <div class="loader">
+                <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+                <p style="margin-top: 10px;">Menü Yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING ACTION BUTTONS -->
+    <div class="fab-container">
+        <button class="fab" style="background: var(--surface); color: var(--primary);" onclick="openOrdersModal()" title="Siparişlerim">
+            <i class="fa-solid fa-receipt"></i>
+        </button>
+        <button class="fab fab-waiter" onclick="openWaiterModal()" title="Masa İşlemleri">
+            <i class="fa-solid fa-bell"></i>
+        </button>
+        <button class="fab" onclick="openCartModal()" title="Sepetim">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <div class="cart-badge" id="cartBadge" style="display:none;">0</div>
+        </button>
+    </div>
+
+    <!-- CART MODAL -->
+    <div class="modal-overlay" id="cartOverlay">
+        <div class="cart-modal">
+            <div class="cart-header">
+                <h2><i class="fa-solid fa-cart-shopping"></i> Sepetim</h2>
+                <button class="cart-close" onclick="closeCartModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <input type="text" id="tableNumber" class="table-input" placeholder="Masa Numaranız (Örn: Masa 5)">
+            
+            <div class="cart-items" id="cartItems">
+                <!-- Items will be injected here -->
+            </div>
+            
+            <div class="cart-total">
+                <span>Toplam:</span>
+                <span id="cartTotalValue" class="text-primary">0 ₺</span>
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 16px;" onclick="sendOrder()">
+                Siparişi Onayla
+            </button>
+        </div>
+    </div>
+
+    <!-- WAITER MODAL -->
+    <div class="modal-overlay" id="waiterOverlay">
+        <div class="waiter-modal">
+            <div class="cart-header" style="justify-content: center; position: relative; margin-bottom: 0;">
+                <h2><i class="fa-solid fa-bell"></i> Masa İşlemleri</h2>
+                <button class="cart-close" style="position: absolute; right: 0;" onclick="closeWaiterModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <input type="text" id="waiterTableNumber" class="table-input" style="margin-top:20px;" placeholder="Masa Numaranız (Örn: Masa 5)">
+            
+            <div class="waiter-buttons">
+                <button class="btn btn-primary" onclick="sendWaiterRequest('Garson Çağırılıyor')">
+                    <i class="fa-solid fa-bell-concierge"></i> Garson Çağır
+                </button>
+                <button class="btn btn-outline" style="border-color: var(--primary); color: var(--primary);" onclick="sendWaiterRequest('Hesap İsteniyor')">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Hesap İste
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDERS MODAL -->
+    <div class="modal-overlay" id="ordersOverlay">
+        <div class="cart-modal">
+            <div class="cart-header">
+                <h2><i class="fa-solid fa-receipt"></i> Siparişlerim</h2>
+                <button class="cart-close" onclick="closeOrdersModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="cart-items" id="ordersList">
+                <!-- Past orders injected here -->
+            </div>
+            <div class="cart-total" style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <span>Toplam Hesap:</span>
+                <span id="totalPayableValue" class="text-primary">0 ₺</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRM MODAL -->
+    <div class="confirm-overlay" id="customConfirmOverlay">
+        <div class="confirm-modal">
+            <div class="confirm-icon" id="confirmIcon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="confirm-title" id="confirmTitle">Emin misiniz?</h3>
+            <p class="confirm-message" id="confirmMessage">Bu işlemi yapmak istediğinize emin misiniz?</p>
+            <div class="confirm-buttons">
+                <button class="btn btn-outline" onclick="closeCustomConfirm()">İptal</button>
+                <button class="btn btn-danger" id="confirmActionBtn">Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlyS7v-r6Yv8Z_E4v_W-I8-vI8vI8vI8",
+            authDomain: "qr-sistemi-4779e.firebaseapp.com",
+            databaseURL: "https://qr-sistemi-4779e-default-rtdb.firebaseio.com",
+            projectId: "qr-sistemi-4779e",
+            storageBucket: "qr-sistemi-4779e.appspot.com",
+            messagingSenderId: "1055866176317",
+            appId: "1:1055866176317:web:4f4f4f4f4f4f4f4f4f4f4f"
+        };
+        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let tumUrunler = {};
+        let kategoriAgaci = {};
+
+        const kategoriIkonlari = {
+            "Yemekler": "fa-burger",
+            "Salatalar": "fa-leaf",
+            "Tatlılar": "fa-ice-cream",
+            "Sıcak İçecekler": "fa-mug-hot",
+            "Soğuk İçecekler": "fa-glass-water",
+            "Alkollü İçecekler": "fa-wine-glass",
+            "Sağlıklı Çaylar": "fa-mug-saucer",
+            "Aperatifler": "fa-cookie",
+            "Diğer": "fa-utensils"
+        };
+
+        const defaultKategoriler = {
+            "Yemekler": { "Hamburgerler": true, "Deniz Ürünleri": true, "Kebaplar": true, "Beyaz Etler": true, "Kırmızı Etler": true, "Pizzalar": true, "Makarnalar": true },
+            "Salatalar": { "Mevsim Salatalar": true, "Diyet Salatalar": true, "Tavuklu Salata": true },
+            "Tatlılar": { "Sütlü Tatlılar": true, "Şerbetli Tatlılar": true, "Pastalar": true },
+            "Sıcak İçecekler": { "Sıcak Kahveler": true, "Sıcak Çikolata": true, "Çaylar": true },
+            "Soğuk İçecekler": { "Meşrubatlar": true, "Soğuk Kahveler": true, "Milkshakeler": true, "Limonata": true },
+            "Alkollü İçecekler": { "Viski": true, "Shot": true, "Kokteyl": true, "Bira": true, "Rakı": true, "Şarap": true },
+            "Sağlıklı Çaylar": { "Yeşil Çay": true, "Bitki Çayları": true, "Detox Çayları": true },
+            "Aperatifler": { "Çıtır Atıştırmalıklar": true, "Patates Kızartması": true, "Çerezler": true },
+            "Diğer": { "Soslar": true, "Ekstralar": true }
+        };
+
+        const anaKategoriSirasi = [
+            "Yemekler",
+            "Salatalar",
+            "Tatlılar",
+            "Sıcak İçecekler",
+            "Soğuk İçecekler",
+            "Alkollü İçecekler",
+            "Sağlıklı Çaylar",
+            "Aperatifler",
+            "Diğer"
+        ];
+
+        // Önce Kategorileri, sonra Ürünleri Çek
+        database.ref('kategoriler').on('value', (snapKat) => {
+            let cats = snapKat.val() || {};
+            let isCatUpdated = false;
+
+            // Özel Temizlik
+            if (cats['çaylar']) {
+                delete cats['çaylar'];
+                isCatUpdated = true;
+            }
+            if (cats['Yemekler'] && cats['Yemekler']['Salatalar']) {
+                delete cats['Yemekler']['Salatalar'];
+                isCatUpdated = true;
+            }
+
+            // Veritabanındaki kategorilerle varsayılanları BİRLEŞTİR (Merge)
+            for (const [anaKat, altKatObj] of Object.entries(defaultKategoriler)) {
+                if (!cats[anaKat]) {
+                    cats[anaKat] = { ...altKatObj };
+                    isCatUpdated = true;
+                } else {
+                    for (const altKat of Object.keys(altKatObj)) {
+                        if (cats[anaKat][altKat] === undefined) {
+                            cats[anaKat][altKat] = true;
+                            isCatUpdated = true;
+                        }
+                    }
+                }
+            }
+
+            if (isCatUpdated) {
+                database.ref('kategoriler').set(cats); // Veritabanını eksiklerle güncelle
+            }
+
+            kategoriAgaci = cats;
+            
+            database.ref('urunler').on('value', (snapUrun) => {
+                tumUrunler = snapUrun.val() || {};
+                
+                renderMenu();
+            }, (error) => {
+                const container = document.getElementById('accordionContainer');
+                if(container) container.innerHTML = '<div class="loader text-primary">Veriler yüklenirken bir hata oluştu.</div>';
+            });
+        });
+
+        function renderMenu() {
+            const container = document.getElementById('accordionContainer');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            if (Object.keys(tumUrunler).length === 0) {
+                container.innerHTML = '<div class="loader">Menüde henüz ürün bulunmamaktadır.</div>';
+                return;
+            }
+            
+            const anaKatList = Object.keys(kategoriAgaci).sort((a, b) => {
+                let indexA = anaKategoriSirasi.indexOf(a);
+                let indexB = anaKategoriSirasi.indexOf(b);
+                if (a === 'Diğer') return 1;
+                if (b === 'Diğer') return -1;
+                if (indexA === -1) indexA = 99;
+                if (indexB === -1) indexB = 99;
+                return indexA - indexB;
+            });
+            
+            let html = '';
+            anaKatList.forEach((ana, index) => {
+                const ikon = kategoriIkonlari[ana] || "fa-utensils";
+                const isFirst = index === 0;
+                
+                const elementId = `acc-${ana.replace(/\\s+/g, '-')}`;
+
+                let altKatHtml = '';
+                if(kategoriAgaci[ana] && Object.keys(kategoriAgaci[ana]).length > 0) {
+                    const altKatList = Object.keys(kategoriAgaci[ana]).sort((a, b) => a.localeCompare(b, 'tr-TR'));
+                    altKatHtml += `<div class="alt-kategori-container" id="bar-${elementId}">`;
+                    altKatHtml += `<div class="category-pill active" onclick="filterSubKategori('${elementId}', 'Tümü', this)">Hepsi</div>`;
+                    altKatList.forEach(alt => {
+                        altKatHtml += `<div class="category-pill" onclick="filterSubKategori('${elementId}', '${alt}', this)">${alt}</div>`;
+                    });
+                    altKatHtml += `</div>`;
+                }
+                
+                // Get products for this category
+                let productsHtml = '';
+                for (let id in tumUrunler) {
+                    const urun = tumUrunler[id];
+                    if (urun.anaKategori !== ana) continue;
+                    
+                    const ad = urun.yemekAdi || urun.ad || urun.urunAdı || 'İsimsiz Ürün';
+                    const gorselHtml = urun.gorsel 
+                        ? `<img src="${urun.gorsel}" class="menu-image" alt="${ad}" onerror="this.outerHTML='<div class=\\'menu-image placeholder\\'><i class=\\'fa-solid fa-image\\'></i></div>'">` 
+                        : `<div class="menu-image placeholder"><i class="fa-solid fa-utensils"></i></div>`;
+
+                    const s = urun.stok !== undefined && urun.stok !== '' ? parseInt(urun.stok) : null;
+                    let outOfStock = false;
+                    let stockBadgeHtml = '';
+                    
+                    if(s !== null) {
+                        if (s <= 0) {
+                            outOfStock = true;
+                            stockBadgeHtml = `<div class="out-of-stock-badge">Tükendi</div>`;
+                        } else if (s < 10) {
+                            stockBadgeHtml = `<div class="stock-badge red">Son ${s} Ürün</div>`;
+                        } else {
+                            stockBadgeHtml = `<div class="stock-badge green">Stok: ${s}</div>`;
+                        }
+                    }
+
+                    const cardClass = outOfStock ? 'menu-card out-of-stock' : 'menu-card';
+                    const urunAltKategori = urun.kategori || 'Genel';
+
+                    productsHtml += `
+                        <div class="${cardClass}" data-alt="${urunAltKategori}">
+                            ${stockBadgeHtml}
+                            ${gorselHtml}
+                            <div class="menu-content">
+                                <span class="menu-category-tag">${urun.kategori || 'Genel'}</span>
+                                <div class="menu-header" style="flex-direction:column; align-items:flex-start; gap:4px; margin-bottom: 0;">
+                                    <h3 class="menu-title">${ad}</h3>
+                                </div>
+                                <div class="menu-price-row">
+                                    <div class="menu-price">${urun.fiyat} ₺</div>
+                                    <button class="btn-add-cart" onclick="addToCart('${id}')" ${outOfStock ? 'disabled' : ''}>
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if(productsHtml === '') {
+                    productsHtml = '<div class="loader" style="color:var(--text-muted); font-size: 14px;">Bu kategoride henüz ürün yok.</div>';
+                }
+
+                html += `
+                    <div class="accordion-item ${isFirst ? 'active' : ''} wobble-hover" id="${elementId}">
+                        <div class="accordion-header" onclick="toggleAccordion('${elementId}')">
+                            <div><i class="fa-solid ${ikon} text-primary" style="margin-right: 8px;"></i> ${ana}</div>
+                            <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="accordion-body">
+                            ${altKatHtml}
+                            <div class="accordion-content menu-grid" id="grid-${elementId}" style="padding-top: 15px;">
+                                ${productsHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        window.filterSubKategori = function(accId, altKat, element) {
+            const bar = document.getElementById('bar-' + accId);
+            if(bar) {
+                bar.querySelectorAll('.category-pill').forEach(el => el.classList.remove('active'));
+            }
+            if(element) element.classList.add('active');
+
+            const grid = document.getElementById('grid-' + accId);
+            if(grid) {
+                grid.querySelectorAll('.menu-card').forEach(card => {
+                    if(altKat === 'Tümü' || card.getAttribute('data-alt') === altKat) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        window.toggleAccordion = function(id) {
+            const item = document.getElementById(id);
+            const isActive = item.classList.contains('active');
+            
+            // Close all others
+            document.querySelectorAll('.accordion-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Toggle clicked
+            if(!isActive) {
+                item.classList.add('active');
+                setTimeout(() => {
+                    item.scrollIntoView({behavior: 'smooth', block: 'start'});
+                }, 300);
+            }
+        }
+
+        // ================= SEPET VE İSTEK MANTIĞI =================
+        let sepet = [];
+
+        function updateCartUI() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const cartBadge = document.getElementById('cartBadge');
+            const cartTotalValue = document.getElementById('cartTotalValue');
+            
+            cartItemsDiv.innerHTML = '';
+            let total = 0;
+            let count = 0;
+
+            if(sepet.length === 0) {
+                cartItemsDiv.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 20px;">Sepetiniz boş.</div>';
+                cartBadge.style.display = 'none';
+                cartTotalValue.innerText = '0 ₺';
+                return;
+            }
+
+            sepet.forEach((item, index) => {
+                total += item.fiyat * item.adet;
+                count += item.adet;
+                
+                cartItemsDiv.innerHTML += `
+                    <div class="cart-item" style="flex-direction: column; align-items: stretch;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="cart-item-info">
+                                <span class="cart-item-title">${item.ad}</span>
+                                <span class="cart-item-price">${item.fiyat} ₺ x ${item.adet}</span>
+                            </div>
+                            <div class="cart-controls">
+                                <button class="cart-btn" onclick="updateCartItem(${index}, -1)"><i class="fa-solid fa-minus"></i></button>
+                                <span>${item.adet}</span>
+                                <button class="cart-btn" onclick="updateCartItem(${index}, 1)"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <input type="text" class="item-note-input" placeholder="Sipariş Notu Ekle (Örn: Domatessiz olsun)" value="${item.not || ''}" onchange="updateItemNote(${index}, this.value)">
+                    </div>
+                `;
+            });
+
+            cartBadge.innerText = count;
+            cartBadge.style.display = 'flex';
+            cartTotalValue.innerText = total + ' ₺';
+        }
+
+        window.updateItemNote = function(index, note) {
+            if(sepet[index]) {
+                sepet[index].not = note;
+            }
+        }
+
+        window.addToCart = function(id) {
+            const urun = tumUrunler[id];
+            if(!urun) return;
+            
+            if(urun.stok !== undefined && urun.stok !== '' && urun.stok <= 0) {
+                showToast("Bu ürün maalesef tükendi.", "error");
+                return;
+            }
+
+            const ad = urun.yemekAdi || urun.ad || urun.urunAdı;
+            const fiyat = parseFloat(urun.fiyat) || 0;
+            
+            const existing = sepet.find(item => item.id === id);
+            if(existing) {
+                if(urun.stok !== undefined && urun.stok !== '' && existing.adet >= urun.stok) {
+                    showToast("Maksimum stok miktarına ulaştınız.", "error");
+                    return;
+                }
+                existing.adet++;
+            } else {
+                sepet.push({ id: id, ad: ad, fiyat: fiyat, adet: 1 });
+            }
+            
+            updateCartUI();
+            showToast(`${ad} sepete eklendi!`);
+        }
+
+        window.updateCartItem = function(index, change) {
+            const item = sepet[index];
+            const urun = tumUrunler[item.id];
+            
+            if(change > 0 && urun.stok !== undefined && urun.stok !== '' && item.adet >= urun.stok) {
+                showToast("Maksimum stok miktarına ulaştınız.", "error");
+                return;
+            }
+
+            item.adet += change;
+            if(item.adet <= 0) {
+                sepet.splice(index, 1);
+            }
+            updateCartUI();
+        }
+
+        window.openCartModal = function() { 
+            document.getElementById('cartOverlay').classList.add('active'); 
+            updateCartUI();
+        }
+        window.closeCartModal = function() { document.getElementById('cartOverlay').classList.remove('active'); }
+        window.openWaiterModal = function() { document.getElementById('waiterOverlay').classList.add('active'); }
+        window.closeWaiterModal = function() { document.getElementById('waiterOverlay').classList.remove('active'); }
+
+        document.getElementById('cartOverlay').addEventListener('click', function(e) {
+            if(e.target === this) closeCartModal();
+        });
+        document.getElementById('waiterOverlay').addEventListener('click', function(e) {
+            if(e.target === this) closeWaiterModal();
+        });
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '<i class="fa-solid fa-circle-check toast-icon"></i>' : '<i class="fa-solid fa-circle-exclamation toast-icon"></i>';
+            toast.innerHTML = `${icon}<div>${message}</div>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ================= CUSTOM CONFIRM MODAL =================
+        function showConfirm(title, message, onConfirm, type = 'danger') {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMessage').innerText = message;
+            
+            const iconDiv = document.getElementById('confirmIcon');
+            const actionBtn = document.getElementById('confirmActionBtn');
+            
+            if(type === 'danger') {
+                iconDiv.style.background = '#fef2f2';
+                iconDiv.style.color = '#ef4444';
+                iconDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                actionBtn.className = 'btn btn-danger';
+            } else {
+                iconDiv.style.background = '#eff6ff';
+                iconDiv.style.color = '#3b82f6';
+                iconDiv.innerHTML = '<i class="fa-solid fa-circle-question"></i>';
+                actionBtn.className = 'btn btn-primary';
+            }
+
+            actionBtn.onclick = function() {
+                closeCustomConfirm();
+                if(onConfirm) onConfirm();
+            };
+            
+            document.getElementById('customConfirmOverlay').classList.add('active');
+        }
+
+        window.closeCustomConfirm = function() {
+            document.getElementById('customConfirmOverlay').classList.remove('active');
+        }
+
+        // ================= SİPARİŞ GEÇMİŞİ VE DATA ISOLATION =================
+        function setMasaNo(masa) {
+            localStorage.setItem('masaNo', masa);
+            document.getElementById('tableNumber').value = masa;
+            document.getElementById('waiterTableNumber').value = masa;
+        }
+
+        function getMasaNo() {
+            return localStorage.getItem('masaNo') || '';
+        }
+
+        window.openOrdersModal = function() {
+            document.getElementById('ordersOverlay').classList.add('active');
+            renderMyOrders();
+        }
+        window.closeOrdersModal = function() { document.getElementById('ordersOverlay').classList.remove('active'); }
+        document.getElementById('ordersOverlay').addEventListener('click', function(e) { if(e.target === this) closeOrdersModal(); });
+
+        function renderMyOrders() {
+            const listDiv = document.getElementById('ordersList');
+            const totalSpan = document.getElementById('totalPayableValue');
+            const currentMasa = getMasaNo();
+            
+            listDiv.innerHTML = '<div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> Yükleniyor...</div>';
+            totalSpan.innerText = '0 ₺';
+
+            if(!currentMasa) {
+                listDiv.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 20px;">Lütfen önce bir sipariş vererek masa numaranızı belirleyin.</div>';
+                return;
+            }
+
+            database.ref('hesapIstekleri').orderByChild('masa').equalTo(currentMasa).once('value').then(snap => {
+                const orders = snap.val() || {};
+                listDiv.innerHTML = '';
+                let total = 0;
+                let count = 0;
+                
+                const sortedOrders = Object.keys(orders).map(k => ({...orders[k], id: k})).sort((a,b) => {
+                    // Sort by time or default string order (Firebase keys are roughly chronological)
+                    return a.id.localeCompare(b.id);
+                }).reverse();
+
+                sortedOrders.forEach(order => {
+                    if (order.tip !== 'Sipariş' || order.arsiv) return; // Only show active food orders
+                    count++;
+                    const isIptal = order.durum === 'İptal Edildi' || order.iptal;
+                    
+                    let orderTotal = 0;
+                    if(order.items && !isIptal) {
+                        order.items.forEach(item => {
+                            if(!item.iptal) {
+                                const iAdet = item.ikramAdet || (item.ikram ? item.adet : 0);
+                                const kalanAdet = Math.max(0, item.adet - iAdet);
+                                if(kalanAdet > 0) {
+                                    orderTotal += (item.fiyat * kalanAdet);
+                                }
+                            }
+                        });
+                    } else if (!isIptal) {
+                        orderTotal = parseFloat((order.tutar || '0').replace('₺', '').trim()) || 0;
+                    }
+                    total += orderTotal;
+                    
+                    const showCancel = (order.durum === 'bekliyor' || order.durum === 'Alındı') && !isIptal;
+                    const statusColor = isIptal ? '#ef4444' : (order.durum === 'tamamlandı' ? '#10b981' : 'var(--primary)');
+                    
+                    listDiv.innerHTML += `
+                        <div style="background: var(--bg-color); padding: 12px; border-radius: var(--radius-md); margin-bottom: 12px; border: 1px solid var(--border-color); ${isIptal ? 'opacity: 0.6;' : ''}">
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 8px; align-items:center;">
+                                <span style="font-weight:600;"><i class="fa-solid fa-clock text-primary"></i> ${order.zaman}</span>
+                                <div style="display:flex; gap:8px;">
+                                    ${showCancel ? `<button class="btn btn-danger btn-sm" onclick="cancelCustomerOrder('${order.id}')"><i class="fa-solid fa-xmark"></i> İptal</button>` : ''}
+                                    <span class="badge" style="background: ${statusColor}; color: white;">${order.durum === 'bekliyor' ? 'Bekliyor' : (order.durum === 'Alındı' ? 'Görüldü' : (order.durum || 'Tamamlandı'))}</span>
+                                </div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px; ${isIptal ? 'text-decoration: line-through;' : ''}">${order.detay}</div>
+                            <div style="text-align: right; font-weight: 700; ${isIptal ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${orderTotal} ₺</div>
+                        </div>
+                    `;
+                });
+
+                if(count === 0) {
+                    listDiv.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 20px;">Bu masaya ait sipariş bulunamadı.</div>';
+                }
+                
+                totalSpan.innerText = total + ' ₺';
+            }).catch(err => {
+                listDiv.innerHTML = '<div style="text-align:center; color: #ef4444; padding: 20px;">Veriler yüklenirken hata oluştu.</div>';
+            });
+        }
+
+        window.cancelCustomerOrder = function(orderId) {
+            showConfirm("Siparişi İptal Et", "Siparişinizi iptal etmek istediğinize emin misiniz?", () => {
+                const orderRef = database.ref('hesapIstekleri/' + orderId);
+                orderRef.once('value').then(snap => {
+                    const orderData = snap.val();
+                    if(!orderData) return;
+                    
+                    if(orderData.durum !== 'bekliyor' && orderData.durum !== 'Alındı') {
+                        showToast("Sipariş hazırlık aşamasında veya tamamlanmış olduğu için iptal edilemez.", "error");
+                        return;
+                    }
+
+                    // Stokları iade et (transaction kullanılarak daha güvenli)
+                    if(orderData.items) {
+                        orderData.items.forEach(item => {
+                            const urunRef = database.ref('urunler/' + item.id + '/stok');
+                            urunRef.transaction((currentStock) => {
+                                if (currentStock === null || currentStock === '') return currentStock; // Sınırsız stok
+                                return currentStock + item.adet;
+                            });
+                        });
+                    }
+                    
+                    orderRef.update({
+                        durum: 'İptal Edildi',
+                        iptal: true
+                    }).then(() => {
+                        showToast("Siparişiniz başarıyla iptal edildi.");
+                        renderMyOrders();
+                        
+                        if(sessionStorage.getItem('activeOrderId') === orderId) {
+                            sessionStorage.removeItem('activeOrderId');
+                        }
+                    });
+                });
+            }, 'danger');
+        }
+
+        window.sendOrder = function() {
+            if(sepet.length === 0) {
+                showToast("Sepetiniz boş!", "error");
+                return;
+            }
+            const masa = document.getElementById('tableNumber').value.trim();
+            if(!masa) {
+                showToast("Lütfen masa numaranızı giriniz!", "error");
+                return;
+            }
+
+            const toplamTutar = document.getElementById('cartTotalValue').innerText;
+            const siparisDetayi = sepet.map(item => `${item.adet}x ${item.ad}`).join(', ');
+
+            const orderItems = sepet.map(item => ({
+                uid: 'item_' + Math.random().toString(36).substr(2, 9),
+                id: item.id,
+                isim: item.ad,
+                adet: item.adet,
+                fiyat: item.fiyat,
+                toplam: item.fiyat * item.adet,
+                not: item.not || '',
+                ikram: false,
+                paid: false,
+                paymentMethod: '',
+                iptal: false
+            }));
+
+            const data = {
+                masa: masa,
+                durum: 'bekliyor',
+                tip: 'Sipariş',
+                zaman: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
+                detay: siparisDetayi,
+                tutar: toplamTutar,
+                isSeen: false,
+                items: orderItems,
+                iptal: false
+            };
+
+            database.ref('hesapIstekleri').push(data).then((ref) => {
+                showToast("Siparişiniz alındı! Hazırlanıyor...");
+                
+                sessionStorage.setItem('activeOrderId', ref.key);
+                
+                // Set and store masaNo
+                setMasaNo(masa);
+                
+                trackActiveOrder();
+                
+                // Sipariş sonrası stokları veritabanında azalt (transaction ile)
+                sepet.forEach(item => {
+                    const urunRef = database.ref('urunler/' + item.id + '/stok');
+                    urunRef.transaction((currentStock) => {
+                        if (currentStock === null || currentStock === '') return currentStock; // Sınırsız
+                        return Math.max(0, currentStock - item.adet);
+                    });
+                });
+
+                sepet = [];
+                updateCartUI();
+                closeCartModal();
+            }).catch(err => showToast("Hata oluştu: " + err.message, "error"));
+        }
+
+        window.sendWaiterRequest = function(tip) {
+            const masa = document.getElementById('waiterTableNumber').value.trim();
+            if(!masa) {
+                showToast("Lütfen masa numaranızı giriniz!", "error");
+                return;
+            }
+
+            const data = {
+                masa: masa,
+                durum: 'bekliyor',
+                tip: tip,
+                zaman: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'})
+            };
+
+            setMasaNo(masa);
+
+            database.ref('hesapIstekleri').push(data).then(() => {
+                showToast("İsteğiniz iletildi!");
+                closeWaiterModal();
+            }).catch(err => showToast("Hata oluştu: " + err.message, "error"));
+        }
+
+        let activeOrderRef = null;
+
+        function trackActiveOrder() {
+            const orderId = sessionStorage.getItem('activeOrderId');
+            if(!orderId) return;
+
+            if(activeOrderRef) activeOrderRef.off();
+            activeOrderRef = database.ref('hesapIstekleri/' + orderId);
+
+            activeOrderRef.on('value', (snap) => {
+                const order = snap.val();
+                if(!order) {
+                    sessionStorage.removeItem('activeOrderId');
+                    return;
+                }
+
+                if(order.durum === 'tamamlandı') {
+                    showToast("Siparişiniz tamamlandı! Afiyet olsun.");
+                    sessionStorage.removeItem('activeOrderId');
+                }
+            });
+        }
+        
+        window.closeWelcomeScreen = function() {
+            const ws = document.getElementById('welcomeScreen');
+            ws.classList.add('fade-out');
+            setTimeout(() => ws.style.display = 'none', 500);
+            sessionStorage.setItem('welcomeSeen', 'true');
+        }
+
+        window.addEventListener('load', () => {
+            if(sessionStorage.getItem('welcomeSeen')) {
+                document.getElementById('welcomeScreen').style.display = 'none';
+            }
+            if(sessionStorage.getItem('activeOrderId')) {
+                trackActiveOrder();
+            }
+            
+            // Populate table inputs if previously set
+            const savedMasa = getMasaNo();
+            if(savedMasa) {
+                document.getElementById('tableNumber').value = savedMasa;
+                document.getElementById('waiterTableNumber').value = savedMasa;
+            }
+        });
+
+    </script>
+</body>
+</html>
